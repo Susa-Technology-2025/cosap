@@ -178,6 +178,27 @@ function LatestNewsSection() {
 
   const newsItems = [
     {
+      date: "June 2026",
+      title: "CoSAP Celebrates Ethiopian Women's Day with SHG Women Across the Country",
+      excerpt: "CoSAP joined women from Self Help Groups across Ethiopia to celebrate Ethiopian Women's Day, honoring the resilience and leadership of SHG women...",
+      image: "/news-womens-day.jpg",
+      tag: "Celebration"
+    },
+    {
+      date: "May 2026",
+      title: "CoSAP Marks Civil Society Week with National Exhibition and Panel Discussion",
+      excerpt: "As part of the annual Civil Society Week, CoSAP organized an exhibition and high-level panel discussion showcasing the contribution of the SHG approach...",
+      image: "/news-civil-society-week.jpg",
+      tag: "Event"
+    },
+    {
+      date: "April 2026",
+      title: "SHG Platform Supports Recovery and Resilience Efforts in Tigray Region",
+      excerpt: "CoSAP and its member organizations are supporting recovery and resilience building in the Tigray region through community-based savings groups...",
+      image: "/news-tigray-recovery.jpg",
+      tag: "Recovery"
+    },
+    {
       date: "May 2026",
       title: "CoSAP Strengthening Civil Society-Government Partnership Under the CSF+ Program",
       excerpt: "As part of the EU CSF+ Program, CoSAP organized a high-level Forum on May 8, 2025 in Hilton Addis Ababa, hosted by the Office of the Prime Minister...",
@@ -258,33 +279,40 @@ function LatestNewsSection() {
 function StatsSection() {
   const sectionRef = useRef<HTMLElement>(null)
   const [isVisible, setIsVisible] = useState(false)
-  const [counts, setCounts] = useState([0, 0, 0, 0, 0])
+  const [counts, setCounts] = useState<Record<string, number>>({})
 
   const stats = [
-    { value: 52, suffix: '', label: 'Member Organizations' },
-    { value: 9, suffix: '', label: 'Regional States & 2 City Administrations' },
-    { value: 29, suffix: 'K+', label: 'Self Help Groups' },
-    { value: 1384, suffix: '+', label: 'Cluster Level Associations' },
-    { value: 30, suffix: '', label: 'Federations' },
+    { id: 'members', value: 52, suffix: '', label: 'Member Organizations' },
+    { id: 'regions', value: 9, suffix: '', label: 'Regional States & 2 City Administrations' },
+    { id: 'shgs', value: 29, suffix: 'K+', label: 'Self Help Groups' },
+    { id: 'clas', value: 1384, suffix: '+', label: 'Cluster Level Associations' },
+    { id: 'federations', value: 30, suffix: '', label: 'Federations' },
   ]
 
   useEffect(() => {
+    const el = sectionRef.current
+    if (!el) return
     const observer = new IntersectionObserver(([entry]) => {
       if (entry.isIntersecting) { setIsVisible(true); observer.disconnect() }
-    }, { threshold: 0.3 })
-    if (sectionRef.current) observer.observe(sectionRef.current)
+    }, { threshold: 0.1 })
+    observer.observe(el)
     return () => observer.disconnect()
   }, [])
 
   useEffect(() => {
     if (!isVisible) return
     const duration = 2000, steps = 60, interval = duration / steps
+    const targetValues = stats.map(s => s.value)
     let step = 0
     const timer = setInterval(() => {
       step++
       const progress = step / steps
       const easeOut = 1 - Math.pow(1 - progress, 3)
-      setCounts(stats.map(stat => Math.round(stat.value * easeOut)))
+      const newCounts: Record<string, number> = {}
+      stats.forEach((stat, i) => {
+        newCounts[stat.id] = Math.round(targetValues[i] * easeOut)
+      })
+      setCounts(newCounts)
       if (step >= steps) clearInterval(timer)
     }, interval)
     return () => clearInterval(timer)
@@ -294,9 +322,9 @@ function StatsSection() {
     <section ref={sectionRef} className="py-16 bg-[#0047AB]">
       <div className="w-full section-padding">
         <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-8">
-          {stats.map((stat, index) => (
-            <div key={index} className="text-center text-white">
-              <div className="text-3xl sm:text-4xl font-bold mb-2">{counts[index]}{stat.suffix}</div>
+          {stats.map((stat) => (
+            <div key={stat.id} className="text-center text-white">
+              <div className="text-3xl sm:text-4xl font-bold mb-2">{counts[stat.id] ?? 0}{stat.suffix}</div>
               <div className="text-white/80 text-sm">{stat.label}</div>
             </div>
           ))}
@@ -320,21 +348,20 @@ function TeamSection() {
   }, [])
 
   const team = [
-    { name: "Mr. Yosef Akalu", role: "Director of CoSAP", image: "/team-1.jpg" },
-    { name: "Mrs. Liyou Alene", role: "Admin & Finance Coordinator", image: "/team-leyou.jpg" },
-    { name: "Mr. Darek Yibeltal", role: "Resource Mobilization & PMEAL Unit Head", image: "/team-darek.jpg" },
-    { name: "Mr. Atenatyos Mezmur", role: "Resource Mobilization & MEAL", image: "/team-atenatyos.jpg" },
-    { name: "Mrs. Betemariam Gashaw", role: "Program Officer", image: "/team-betty.jpg" },
-    { name: "Mrs. Hana Eshete", role: "Program Officer", image: "/team-hana.jpg" },
-    { name: "Mrs. Selam Girma", role: "Finance Officer", image: "/team-selam.jpg" },
-    { name: "Mr. Tsegaye Milikyas", role: "Regional Capacity Building Advisor", image: "/team-tsegaye.jpg" },
-    { name: "Mr. Natnael Solomon", role: "Program Assistant", image: "/team-natnael.jpg" },
-    { name: "Ms. Kalkidan Yared", role: "Program Assistant", image: "/team-kalkidan-y.jpg" },
-    { name: "Mr. Yirgalem Abebaw", role: "Program Assistant", image: "/team-yirgalem.jpg" },
-    { name: "Ms. Kalkidan Buzayew", role: "Program Assistant", image: "/team-kalkidan-b.jpg" },
-    { name: "Mr. Melkamu Daksa", role: "Project Coordinator", image: "/team-melkamu.jpg" },
-    { name: "Mrs. Meseret Tsegaye", role: "Store Manager", image: "/team-mesi.jpg" },
-    { name: "Mr. Yoseph Arage", role: "Driver/Purchaser", image: "/team-yoseph.jpg" },
+    { name: "Mr. Yosef Akalu", role: "Director of CoSAP", image: "/new_team_mr_yosef_akalu.jpg" },
+    { name: "Mrs. Liyou Alene", role: "Admin & Finance Coordinator", image: "/new_team_mrs_liyou_alene.jpg" },
+    { name: "Mr. Darek Yibeltal", role: "Resource Mobilization & PMEAL Unit Head", image: "/new_team_mr_darek_yibeltal.jpg" },
+    { name: "Mr. Atenatyos Mezmur", role: "Resource Mobilization & MEAL", image: "/new_team_mr_atenatyos_mezmur.jpg" },
+    { name: "Mrs. Betemariyam Gashaw", role: "Program Officer", image: "/new_team_mrs_betemariyam_gashaw.jpg" },
+    { name: "Mrs. Hana Eshete", role: "Program Officer", image: "/new_team_mrs_hana_eshete.jpg" },
+    { name: "Mrs. Selam Girma", role: "Finance Officer", image: "/new_team_mrs_selam_girma.jpg" },
+    { name: "Mr. Tsegaye Milikyas", role: "Regional Capacity Building Advisor", image: "/new_team_mr_tsegaye_milikyas.jpg" },
+    { name: "Dr. Yirgalem Abebaw", role: "MEAL Officer", image: "/new_team_dr_yirgalem_abebaw.jpg" },
+    { name: "Ms. Kalkidan Buzayew", role: "Program Assistant", image: "/new_team_ms_kalkidan_buzayew.jpg" },
+    { name: "Mr. Natnael Solomon", role: "Program Assistant", image: "/new_team_mr_natnael_solomon.jpg" },
+    { name: "Ms. Kalkidan Yared", role: "Program Assistant", image: "/new_team_ms_kalkidan_yared.jpg" },
+    { name: "Mr. Yoseph Arage", role: "Driver/Purchaser", image: "/new_team_mr_yoseph_arage.jpg" },
+    { name: "Mrs. Meseret Tsegaye", role: "Store Manager", image: "/new_team_mrs_meseret_tsegaye.jpg" },
   ]
 
   return (
@@ -344,13 +371,13 @@ function TeamSection() {
           <h2 className="text-3xl font-bold text-[#0047AB] mb-2">OUR TEAM</h2>
           <p className="text-gray-600 text-lg">Meet the people behind our mission</p>
         </div>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 gap-6">
           {team.map((member, index) => (
             <div key={index}
               className={`text-center transition-all duration-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'}`}
               style={{ transitionDelay: `${index * 80}ms` }}>
-              <div className="w-28 h-28 mx-auto mb-3 rounded-full overflow-hidden shadow-md border-4 border-[#0047AB]/10">
-                <img src={member.image} alt={member.name} className="w-full h-full object-cover" />
+              <div className="w-[150px] h-[200px] mx-auto mb-3 rounded-xl overflow-hidden shadow-md border-2 border-[#0047AB]/10">
+                <img src={member.image} alt={member.name} className="w-full h-full object-cover object-top" />
               </div>
               <h3 className="font-semibold text-gray-800 text-sm">{member.name}</h3>
               <p className="text-[#0047AB] text-xs mt-1">{member.role}</p>
@@ -392,7 +419,15 @@ function PartnersSection() {
     <section className="py-16 bg-gray-50">
       <div className="w-full section-padding">
         <h2 className="text-center text-[#0047AB] font-semibold mb-8">OUR PARTNERS</h2>
-        <div className="relative max-w-5xl mx-auto">
+        {/* Mobile: static grid, Desktop: carousel */}
+        <div className="md:hidden grid grid-cols-2 gap-4 max-w-lg mx-auto">
+          {partners.map((partner, index) => (
+            <div key={index} className="bg-white rounded-xl p-4 h-24 flex items-center justify-center shadow-sm">
+              <img src={partner.image} alt={partner.name} className="max-h-16 max-w-full object-contain" />
+            </div>
+          ))}
+        </div>
+        <div className="hidden md:block relative max-w-5xl mx-auto">
           <button onClick={prevSlide}
             className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center text-[#0047AB] hover:bg-[#0047AB] hover:text-white transition-colors">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>

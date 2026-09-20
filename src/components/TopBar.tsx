@@ -6,9 +6,9 @@ export default function TopBar() {
       <div className="w-full section-padding">
         <div className="flex flex-wrap items-center justify-between gap-2 text-sm">
           <div className="flex items-center gap-6">
-            <a href="tel:+251930014725" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+            <a href="tel:+251980286565" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
               <Phone size={14} />
-              <span>+251 93 001 4725</span>
+              <span>+251 98 028 6565</span>
             </a>
             <a href="mailto:info@shgconsortiumeth.org" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
               <Mail size={14} />

@@ -13,6 +13,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import fs from 'fs';
 
 // Load environment variables from .env file
 // In production, these should be set as environment variables on the hosting platform
@@ -29,7 +30,7 @@ app.use(cors({
   origin: process.env.FRONTEND_URL || 'http://localhost:5173',
   credentials: true
 }));
-app.use(express.json());
+app.use(express.json({ limit: '10mb' }));
 
 // Serve static files from the dist folder (built React app)
 app.use(express.static(path.join(__dirname, 'dist')));
@@ -100,8 +101,8 @@ app.post('/api/chapa/initialize', async (req, res) => {
       callback_url: `${baseUrl}/api/chapa/callback`,
       return_url: `${baseUrl}/api/chapa/verify`,
       customization: customization || {
-        title: 'Donation to CoSAP',
-        description: 'Support women empowerment through Self Help Groups in Ethiopia',
+        title: 'CoSAP Donate',
+        description: 'Empower women via Self Help Groups',
         logo: `${baseUrl}/cosap-logo.jpg`
       }
     };
@@ -247,24 +248,219 @@ app.get('/api/health', (req, res) => {
 });
 
 // ============================================
+// CONTACT FORM API ENDPOINT
+// ============================================
+
+// Simple JSON file storage for contact messages (replace with database in production)
+const CONTACT_FILE = path.join(__dirname, 'data', 'contacts.json');
+
+// Ensure data directory exists
+const dataDir = path.join(__dirname, 'data');
+if (!fs.existsSync(dataDir)) {
+  fs.mkdirSync(dataDir, { recursive: true });
+}
+
+// Initialize contacts file if it doesn't exist
+if (!fs.existsSync(CONTACT_FILE)) {
+  fs.writeFileSync(CONTACT_FILE, JSON.stringify([], null, 2));
+}
+
+/**
+ * Submit a contact form message
+ * POST /api/contact
+ * 
+ * Request body:
+ * {
+ *   firstName: string (required),
+ *   lastName: string (required),
+ *   email: string (required),
+ *   subject: string (required),
+ *   message: string (required)
+ * }
+ * 
+ * This endpoint:
+ * 1. Validates the form data
+ * 2. Stores the message in a local JSON file
+ * 3. Sends an email notification to info@shgconsortiumeth.org
+ */
+app.post('/api/contact', async (req, res) => {
+  try {
+    const { firstName, lastName, email, subject, message } = req.body;
+
+    // Validation
+    if (!firstName || !lastName || !email || !subject || !message) {
+      return res.status(400).json({
+        success: false,
+        message: 'All fields are required'
+      });
+    }
+
+    // Email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid email format'
+      });
+    }
+
+    // Create contact entry
+    const contactEntry = {
+      id: `MSG-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+      firstName,
+      lastName,
+      email,
+      subject,
+      message,
+      submittedAt: new Date().toISOString(),
+      status: 'new'
+    };
+
+    // Store in JSON file
+    let contacts = [];
+    try {
+      const fileContent = fs.readFileSync(CONTACT_FILE, 'utf-8');
+      contacts = JSON.parse(fileContent);
+    } catch (e) {
+      contacts = [];
+    }
+    contacts.push(contactEntry);
+    fs.writeFileSync(CONTACT_FILE, JSON.stringify(contacts, null, 2));
+
+    // Send email notification to info@shgconsortiumeth.org
+    const emailContent = `
+New Contact Form Submission
+============================
+From: ${firstName} ${lastName}
+Email: ${email}
+Subject: ${subject}
+Date: ${new Date().toLocaleString()}
+
+Message:
+${message}
+============================
+This message was submitted via the CoSAP website contact form.
+    `.trim();
+
+    // Log the message
+    console.log('=== NEW CONTACT FORM SUBMISSION ===');
+    console.log(emailContent);
+    console.log('===================================');
+
+    // Attempt to send email notification via nodemailer (if SMTP configured)
+    if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
+      try {
+        const nodemailer = (await import('nodemailer')).default;
+        const transporter = nodemailer.createTransport({
+          host: process.env.SMTP_HOST,
+          port: parseInt(process.env.SMTP_PORT || '587'),
+          secure: process.env.SMTP_SECURE === 'true',
+          auth: {
+            user: process.env.SMTP_USER,
+            pass: process.env.SMTP_PASS
+          }
+        });
+
+        await transporter.sendMail({
+          from: `"CoSAP Website" <${process.env.SMTP_USER}>`,
+          to: 'info@shgconsortiumeth.org',
+          replyTo: email,
+          subject: `New Contact: ${subject}`,
+          text: emailContent,
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+              <div style="background: #0047AB; color: white; padding: 20px; border-radius: 8px 8px 0 0;">
+                <h2 style="margin: 0;">New Contact Form Submission</h2>
+              </div>
+              <div style="background: #f9f9f9; padding: 20px; border-radius: 0 0 8px 8px;">
+                <table style="width: 100%; border-collapse: collapse;">
+                  <tr><td style="padding: 8px; font-weight: bold;">Name:</td><td style="padding: 8px;">${firstName} ${lastName}</td></tr>
+                  <tr><td style="padding: 8px; font-weight: bold;">Email:</td><td style="padding: 8px;"><a href="mailto:${email}">${email}</a></td></tr>
+                  <tr><td style="padding: 8px; font-weight: bold;">Subject:</td><td style="padding: 8px;">${subject}</td></tr>
+                  <tr><td style="padding: 8px; font-weight: bold;">Date:</td><td style="padding: 8px;">${new Date().toLocaleString()}</td></tr>
+                </table>
+                <hr style="border: none; border-top: 1px solid #ddd; margin: 16px 0;" />
+                <h4>Message:</h4>
+                <p style="background: white; padding: 16px; border-radius: 4px; border: 1px solid #ddd;">${message.replace(/\n/g, '<br>')}</p>
+              </div>
+            </div>
+          `
+        });
+        console.log(`[EMAIL] Notification sent to info@shgconsortiumeth.org`);
+      } catch (emailError) {
+        console.error('[EMAIL] Failed to send notification:', emailError.message);
+      }
+    } else {
+      console.log('[EMAIL] SMTP not configured. Message stored locally only.');
+      console.log('[EMAIL] To enable email notifications, set SMTP_HOST, SMTP_USER, SMTP_PASS in .env');
+    }
+
+    res.json({
+      success: true,
+      message: 'Your message has been received. We will get back to you shortly.',
+      data: {
+        id: contactEntry.id,
+        submittedAt: contactEntry.submittedAt
+      }
+    });
+
+  } catch (error) {
+    console.error('Contact form error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Failed to process your message. Please try again later.'
+    });
+  }
+});
+
+/**
+ * Get contact messages (admin endpoint)
+ * GET /api/contact
+ */
+app.get('/api/contact', (req, res) => {
+  try {
+    let contacts = [];
+    try {
+      const fileContent = fs.readFileSync(CONTACT_FILE, 'utf-8');
+      contacts = JSON.parse(fileContent);
+    } catch (e) {
+      contacts = [];
+    }
+    res.json({
+      success: true,
+      data: contacts,
+      total: contacts.length
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: 'Failed to retrieve messages'
+    });
+  }
+});
+
+// ============================================
 // FRONTEND ROUTING (SPA Support)
 // ============================================
 
 // For any route not matching API, serve the React app
 // This must be the LAST route
-app.get('*', (req, res) => {
+app.get('/{*path}', (req, res) => {
   res.sendFile(path.join(__dirname, 'dist', 'index.html'));
 });
 
 // ============================================
 // START SERVER
 // ============================================
-app.listen(PORT, () => {
-  console.log(`========================================`);
-  console.log(`CoSAP Server running on port ${PORT}`);
-  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`API Base: http://localhost:${PORT}/api`);
-  console.log(`========================================`);
-});
+// Phusion Passenger support - don't call listen when running under Passenger
+if (!process.env.PASSENGER_BASE_URI) {
+  app.listen(PORT, () => {
+    console.log(`========================================`);
+    console.log(`CoSAP Server running on port ${PORT}`);
+    console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`API Base: http://localhost:${PORT}/api`);
+    console.log(`========================================`);
+  });
+}
 
 export default app;

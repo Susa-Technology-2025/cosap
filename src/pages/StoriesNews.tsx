@@ -59,7 +59,7 @@ In closing, Mr. Milkessa extended heartfelt thanks to DEC and CoSAP for their ge
     {
       title: "From Borrowing Flour to Building a Better Future",
       excerpt: "When Haimanot Woldie lost her husband, she was left alone to raise two young children with no stable income. She began baking and selling injera, even borrowing her first bag of teff flour just to get started. Her life reached a turning point when she joined a Self-Help Group.",
-      image: "/success-haimanot.jpg",
+      image: "/new_success_haimanot_woldie.jpg",
       date: "June 1, 2025",
       author: "CoSAP Team",
       category: "Success Story",
@@ -72,7 +72,7 @@ Through the group's financial support and various capacity-building trainings, h
     {
       title: "The Voice That Rose from Silence",
       excerpt: "For years, Meseret lived quietly, gripped by shyness and lacking confidence. When she joined her Self-Help Group in 2009, her journey began with a weekly saving of just 5 Birr. Today, she serves as Secretary and Board Member of the Yitawok Federation.",
-      image: "/success-meseret.jpg",
+      image: "/new_success_meseret.jpg",
       date: "June 1, 2025",
       author: "CoSAP Team",
       category: "Success Story",

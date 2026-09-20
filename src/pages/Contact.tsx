@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { MapPin, Phone, Mail, Send, Facebook, Youtube, Linkedin } from 'lucide-react'
+import { MapPin, Phone, Mail, Send, Facebook, Youtube, Linkedin, CheckCircle, AlertCircle } from 'lucide-react'
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -10,20 +10,40 @@ export default function Contact() {
     message: ''
   })
   const [submitted, setSubmitted] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState('')
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    const mailtoLink = `mailto:yosef.cosap@gmail.com?subject=${encodeURIComponent(formData.subject)}&body=${encodeURIComponent(
-      `Name: ${formData.firstName} ${formData.lastName}\nEmail: ${formData.email}\n\n${formData.message}`
-    )}`
-    window.open(mailtoLink, '_blank')
-    setSubmitted(true)
+    setSubmitting(true)
+    setError('')
+    
+    try {
+      const response = await fetch(`/api/contact`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData)
+      })
+      
+      const data = await response.json()
+      
+      if (response.ok && data.success) {
+        setSubmitted(true)
+        setFormData({ firstName: '', lastName: '', email: '', subject: '', message: '' })
+      } else {
+        setError(data.message || 'Failed to send message. Please try again.')
+      }
+    } catch (err) {
+      setError('Network error. Please check your connection and try again.')
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   const phoneNumbers = [
-    { label: "+251 93 001 4725", href: "tel:+251930014725" },
-    { label: "+251 91 115 6622", href: "tel:+251911156622" },
-    { label: "+251 91 000 8975", href: "tel:+251910008975" },
+    { label: "+251 98 028 6565", href: "tel:+251980286565" },
+    { label: "+251 91 125 5456", href: "tel:+251911255456" },
+    { label: "+251 91 125 5653", href: "tel:+251911255653" },
   ]
 
   return (
@@ -86,7 +106,6 @@ export default function Contact() {
                   <div>
                     <h4 className="font-semibold text-gray-800 mb-1">Email</h4>
                     <a href="mailto:info@shgconsortiumeth.org" className="text-gray-600 hover:text-[#0047AB] transition-colors block">info@shgconsortiumeth.org</a>
-                    <a href="mailto:yosef.cosap@gmail.com" className="text-gray-600 hover:text-[#0047AB] transition-colors block">yosef.cosap@gmail.com</a>
                   </div>
                 </div>
               </div>
@@ -113,14 +132,20 @@ export default function Contact() {
               {submitted ? (
                 <div className="text-center py-10">
                   <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Send size={28} className="text-green-600" />
+                    <CheckCircle size={28} className="text-green-600" />
                   </div>
                   <h4 className="text-xl font-semibold text-gray-800 mb-2">Message Sent!</h4>
-                  <p className="text-gray-600 mb-6">Your message has been sent to yosef.cosap@gmail.com</p>
+                  <p className="text-gray-600 mb-6">Thank you for reaching out. We will get back to you shortly.</p>
                   <button onClick={() => setSubmitted(false)} className="px-6 py-2 bg-[#0047AB] text-white rounded-lg hover:bg-[#003380] transition-colors">Send Another Message</button>
                 </div>
               ) : (
                 <form onSubmit={handleSubmit} className="space-y-5">
+                  {error && (
+                    <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+                      <AlertCircle size={16} />
+                      <span>{error}</span>
+                    </div>
+                  )}
                   <div className="grid sm:grid-cols-2 gap-5">
                     <div>
                       <label className="block text-gray-700 text-sm font-medium mb-2">First Name</label>
@@ -143,13 +168,51 @@ export default function Contact() {
                     <label className="block text-gray-700 text-sm font-medium mb-2">Message</label>
                     <textarea rows={4} required value={formData.message} onChange={(e) => setFormData({ ...formData, message: e.target.value })} className="w-full px-4 py-3 bg-white border border-gray-200 rounded-lg focus:outline-none focus:border-[#0047AB] resize-none" />
                   </div>
-                  <button type="submit" className="w-full py-3 bg-[#0047AB] text-white font-medium rounded-lg hover:bg-[#003380] transition-colors flex items-center justify-center gap-2">
-                    <Send size={18} /> Send Message
+                  <button 
+                    type="submit" 
+                    disabled={submitting}
+                    className="w-full py-3 bg-[#0047AB] text-white font-medium rounded-lg hover:bg-[#003380] transition-colors flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+                  >
+                    {submitting ? (
+                      <>
+                        <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Sending...
+                      </>
+                    ) : (
+                      <>
+                        <Send size={18} /> Send Message
+                      </>
+                    )}
                   </button>
                 </form>
               )}
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* Map Section */}
+      <section className="py-12 bg-gray-50">
+        <div className="w-full section-padding">
+          <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">Find Us</h2>
+          <div className="max-w-6xl mx-auto rounded-2xl overflow-hidden shadow-lg">
+            <iframe
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d31529.406!2d38.746!3d9.005!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x17b1f0!2sLideta%2C+Addis+Ababa!5e0!3m2!1sen!2set!4v1700000000000!5m2!1sen!2set"
+              width="100%"
+              height="400"
+              style={{ border: 0 }}
+              allowFullScreen
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              title="CoSAP Office Location"
+            />
+          </div>
+          <p className="text-center text-gray-500 mt-4 text-sm">
+            Lideta Sub City, Woreda 10, African Union Area, Addis Ababa, Ethiopia
+          </p>
         </div>
       </section>
     </div>
