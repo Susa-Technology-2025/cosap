@@ -230,7 +230,7 @@ export default function About() {
       name: "Mr. Gelaye Hailu",
       title: "Member, CoSAP Board of Directors",
       org: "Facilitator for Change (FC)",
-      image: "/board-gelaye.jpg",
+      image: "",
       bio: "Mr. Gelaye Hailu is the Executive Director of Facilitator for Change (FC). FC is the founding member of CoSAP. Mr. Gelaye is serving as the member of CoSAP board since 2019 (re-elected). He holds BA degree with over thirty years of professional experience in the Ethiopian CSO sector.",
       email: "gelaye@gmail.com"
     },
@@ -403,12 +403,19 @@ export default function About() {
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
             {boardMembers.map((member, index) => (
               <div key={index} className="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-lg transition-shadow border border-gray-100">
-                <div className="h-64 overflow-hidden bg-gray-100">
-                  <img 
-                    src={member.image} 
-                    alt={member.name}
-                    className="w-full h-full object-cover object-top"
-                  />
+                <div className="h-64 overflow-hidden bg-gray-100 flex items-center justify-center">
+                  {member.image ? (
+                    <img 
+                      src={member.image} 
+                      alt={member.name}
+                      className="w-full h-full object-cover object-top"
+                    />
+                  ) : (
+                    <div className="flex flex-col items-center justify-center text-gray-400">
+                      <Users size={64} className="mb-2 opacity-30" />
+                      <span className="text-sm font-medium">Photo not available</span>
+                    </div>
+                  )}
                 </div>
                 <div className="p-5">
                   <h3 className="font-semibold text-gray-800">{member.name}</h3>
@@ -433,6 +440,21 @@ export default function About() {
                 </div>
               </div>
             ))}
+          </div>
+
+          {/* Board Group Photo */}
+          <div className="mt-12 max-w-5xl mx-auto">
+            <div className="bg-white rounded-2xl overflow-hidden shadow-lg border border-gray-100">
+              <img 
+                src="/board-group-photo.jpg" 
+                alt="CoSAP Board Members Group Photo"
+                className="w-full h-auto object-cover"
+              />
+              <div className="p-4 text-center bg-gray-50">
+                <p className="text-gray-700 font-medium text-sm">CoSAP Board of Directors</p>
+                <p className="text-gray-500 text-xs mt-1">Strategic guidance and governance for CoSAP's mission across Ethiopia</p>
+              </div>
+            </div>
           </div>
         </div>
       </section>

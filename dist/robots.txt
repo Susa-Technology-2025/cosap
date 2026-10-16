@@ -1,0 +1,5 @@
+# robots.txt for CoSAP Ethiopia
+User-agent: *
+Allow: /
+
+Sitemap: https://shgconsortiumeth.org/sitemap.xml

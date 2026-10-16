@@ -350,14 +350,14 @@ function TeamSection() {
   const team = [
     { name: "Mr. Yosef Akalu", role: "Director of CoSAP", image: "/new_team_mr_yosef_akalu.jpg" },
     { name: "Mrs. Liyou Alene", role: "Admin & Finance Coordinator", image: "/new_team_mrs_liyou_alene.jpg" },
-    { name: "Mr. Darek Yibeltal", role: "Resource Mobilization & PMEAL Unit Head", image: "/new_team_mr_darek_yibeltal.jpg" },
+    { name: "Mr. Darek Yibeltal", role: "Program Coordinator", image: "/new_team_mr_darek_yibeltal.jpg" },
     { name: "Mr. Atenatyos Mezmur", role: "Resource Mobilization & MEAL", image: "/new_team_mr_atenatyos_mezmur.jpg" },
     { name: "Mrs. Betemariyam Gashaw", role: "Program Officer", image: "/new_team_mrs_betemariyam_gashaw.jpg" },
     { name: "Mrs. Hana Eshete", role: "Program Officer", image: "/new_team_mrs_hana_eshete.jpg" },
     { name: "Mrs. Selam Girma", role: "Finance Officer", image: "/new_team_mrs_selam_girma.jpg" },
     { name: "Mr. Tsegaye Milikyas", role: "Regional Capacity Building Advisor", image: "/new_team_mr_tsegaye_milikyas.jpg" },
     { name: "Dr. Yirgalem Abebaw", role: "MEAL Officer", image: "/new_team_dr_yirgalem_abebaw.jpg" },
-    { name: "Ms. Kalkidan Buzayew", role: "Program Assistant", image: "/new_team_ms_kalkidan_buzayew.jpg" },
+    { name: "Mrs. Kalkidan Buzayew", role: "Program Assistant", image: "/new_team_ms_kalkidan_buzayew.jpg" },
     { name: "Mr. Natnael Solomon", role: "Program Assistant", image: "/new_team_mr_natnael_solomon.jpg" },
     { name: "Ms. Kalkidan Yared", role: "Program Assistant", image: "/new_team_ms_kalkidan_yared.jpg" },
     { name: "Mr. Yoseph Arage", role: "Driver/Purchaser", image: "/new_team_mr_yoseph_arage.jpg" },
@@ -403,6 +403,9 @@ function PartnersSection() {
     { name: "Tearfund", image: "/partners/tearfund.jpg" },
     { name: "Wilde Gazen", image: "/partners/wilde-gazen.jpg" },
     { name: "Ministry of Foreign Affairs", image: "/partners/min-foreign-affairs.jpg" },
+    { name: "FSD Ethiopia", image: "/partners/fsd-ethiopia.png" },
+    { name: "ShareTrust", image: "/partners/sharetrust.png" },
+    { name: "DStv", image: "/partners/dstv.jpg" },
   ]
   const visiblePartners = 4
   const maxIndex = Math.max(0, partners.length - visiblePartners)
